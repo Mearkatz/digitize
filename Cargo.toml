@@ -1,10 +1,11 @@
 [package]
 name = "digitize"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["beetle"]
 license = "MIT"
 description = "Traits for accessing digits of primitive integers & floats"
+repository = "https://github.com/Mearkatz/beetle_fraction"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

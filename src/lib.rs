@@ -66,6 +66,7 @@ impl FloatDigits for f64 {
     }
 
     fn digits_right_of_dot(&self) -> Box<[u32]> {
+        // Infinity and NaN don't have any digits in my opinion
         if !self.is_finite() {
             [].into()
         } else {
