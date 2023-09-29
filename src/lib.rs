@@ -1,80 +1,58 @@
 //! Traits for iterating over the digits of any primitive integer or float
 
-use traits::Digits;
+use traits::{Digits, FloatDigits};
 
 pub mod traits;
 
-impl Digits for u8 {}
-impl Digits for u16 {}
-impl Digits for u32 {}
-impl Digits for u64 {}
-impl Digits for u128 {}
-impl Digits for usize {}
-
-impl Digits for i8 {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
-}
-impl Digits for i16 {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
-}
-impl Digits for i32 {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
-}
-impl Digits for i64 {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
-}
-impl Digits for i128 {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
-}
-impl Digits for isize {
-    fn digits(&self) -> Box<[u32]> {
-        self.unsigned_abs().digits()
-    }
+/// Expands to the default implementation of a trait on all the types provided
+macro_rules! default_impl {
+    ($tr: ty,$($x: ty),*) => {
+        $(
+            impl $tr for $x {}
+        )*
+    };
 }
 
-pub trait FloatDigits {
-    fn digits_left_of_dot(&self) -> Box<[u32]>;
-
-    fn digits_right_of_dot(&self) -> Box<[u32]>;
-
-    fn digits_left_then_right_of_dot(&self) -> [Box<[u32]>; 2] {
-        [self.digits_left_of_dot(), self.digits_right_of_dot()]
-    }
+/// Generates an implementation of Digits for `i*` using the corresponding `u*`'s implementation
+macro_rules! piggyback {
+    ($($x: ty),*) => {
+        $(
+            impl Digits for $x {
+                fn digits(&self) -> Box<[u32]> {
+                    self.unsigned_abs().digits()
+                }
+            }
+        )*
+    };
 }
+
+/// Unsafely casts the characters in `x`'s string representation to u32's.
+/// Should only be used on unsigned or positive numeric types.
+#[inline(always)]
+pub fn stringable_to_digits<T: ToString>(x: T) -> Box<[u32]> {
+    x.to_string()
+        .chars()
+        .map(|c| unsafe { c.to_digit(10).unwrap_unchecked() })
+        .collect()
+}
+
+default_impl!(Digits, u8, u16, u32, u64, u128, usize);
+piggyback!(i8, i16, i32, i64, i128, isize);
 
 impl FloatDigits for f64 {
     fn digits_left_of_dot(&self) -> Box<[u32]> {
-        if !self.is_finite() {
-            [].into()
+        if self.is_finite() {
+            stringable_to_digits(self.trunc())
         } else {
-            self.trunc()
-                .to_string()
-                .chars()
-                .map(|c| unsafe { c.to_digit(10).unwrap_unchecked() })
-                .collect()
+            Box::new([]) // Infinity & NaN have no digits
         }
     }
 
     fn digits_right_of_dot(&self) -> Box<[u32]> {
-        // Infinity and NaN don't have any digits in my opinion
-        if !self.is_finite() {
-            [].into()
+        if self.is_finite() {
+            stringable_to_digits(self.fract())
         } else {
-            self.fract()
-                .to_string()
-                .chars()
-                .map(|c| unsafe { c.to_digit(10).unwrap_unchecked() })
-                .collect()
+            Box::new([]) // Infinity & NaN have no digits
         }
     }
 }
