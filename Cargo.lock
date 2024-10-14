@@ -3,5 +3,14 @@
 version = 3
 
 [[package]]
+name = "default-impl"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27fbe7eb47806ff60f5ceda913bc53db3dcb6fad1c521dfa37e7f61bdf86e411"
+
+[[package]]
 name = "digitize"
-version = "0.1.1"
+version = "0.1.2"
+dependencies = [
+ "default-impl",
+]
