@@ -10,4 +10,4 @@ repository = "https://github.com/Mearkatz/beetle_fraction"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-default-impl = "0.1.0"
+tinyvec = "1.8.1"
